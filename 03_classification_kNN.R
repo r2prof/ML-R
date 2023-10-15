@@ -1,16 +1,15 @@
-###############################################
-#          SOURCE CODE FOR CHAPTER 3          #
-###############################################
+# CH-03 - Classifying based on similarities with 
+#         k-nearest neighbors
 
-# INSTALLING AND LOADING PACKAGES ----
-install.packages("mlr", dependencies = TRUE) # could take several minutes
+# Installing and loading packages----
+# install.packages("mlr", dependencies = TRUE) 
 # only needed once on any R installation
-
-library(mlr)
+library(mlr3)
+# library(mlr)
 
 library(tidyverse)
 
-# LOADING DIABETES DATA ----
+# Loading diabetes data ----
 data(diabetes, package = "mclust")
 
 diabetesTib <- as_tibble(diabetes)
@@ -19,7 +18,7 @@ summary(diabetesTib)
 
 diabetesTib
 
-# PLOT THE RELATIONSHIPS IN THE DATA ----
+# Plot the relationships in the data----
 ggplot(diabetesTib, aes(glucose, insulin, col = class)) + 
   geom_point()  +
   theme_bw()
