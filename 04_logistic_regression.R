@@ -16,14 +16,14 @@ titanicTib
 # Clean data----
 fctrs <- c("Survived", "Sex", "Pclass")
 
-titanicClean <- titanicTib %>%
-  mutate_at(.vars = fctrs, .funs = factor) %>%
-  mutate(FamSize = SibSp + Parch) %>%
+titanicClean <- titanicTib |>
+  mutate_at(.vars = fctrs, .funs = factor) |>
+  mutate(FamSize = SibSp + Parch) |>
   select(Survived, Pclass, Sex, Age, Fare, FamSize)
 
 titanicClean
 
-# PLOT DATA ----
+# Plot data----
 titanicUntidy <- gather(titanicClean, key = "Variable", value = "Value", 
                         -Survived)
 titanicUntidy 
@@ -42,36 +42,36 @@ titanicUntidy %>%
   geom_bar(position = "fill") +
   theme_bw()
 
-# CREATE TASK AND LEARNER, AND ATTEMPT TO TRAIN MODEL ----
+# Create task and learner, and train the model----
 titanicTask <- makeClassifTask(data = titanicClean, target = "Survived")
 
 logReg <- makeLearner("classif.logreg", predict.type = "prob")
 
 logRegModel <- train(logReg, titanicTask)
 
-# COUNT MISSING VALUES IN Age VARIABLE ----
+# Count missing values in Age variable ----
 titanicClean$Age
 
 sum(is.na(titanicClean$Age))
 
-# IMPUTE MISSING VALUES ----
+# Impute missing values ----
 imp <- impute(titanicClean, cols = list(Age = imputeMean()))
 
 sum(is.na(titanicClean$Age))
 
 sum(is.na(imp$data$Age))
 
-# CREATE TASK WITH IMPUTED DATA AND TRAIN MODEL ----
+# Create task with imputed data and train model ----
 titanicTask <- makeClassifTask(data = imp$data, target = "Survived")
 
 logRegModel <- train(logReg, titanicTask)
 
-# WRAP LEARNER ----
+# Wrap Learner ----
 logRegWrapper <- makeImputeWrapper("classif.logreg",
                                    cols = list(Age = imputeMean()))
 logRegWrapper
 
-# CROSS-VALIDATE ----
+# Cross-Validate ----
 kFold <- makeResampleDesc(method = "RepCV", folds = 10, reps = 50, 
                           stratify = TRUE)
 
@@ -79,14 +79,14 @@ logRegwithImpute <- resample(logRegWrapper, titanicTask, resampling = kFold,
                              measures = list(acc, fpr, fnr))
 logRegwithImpute
 
-# EXTRACT ODDS RATIOS
+# Extract odds ratios
 logRegModelData <- getLearnerModel(logRegModel)
 
 coef(logRegModelData)
 
 exp(cbind(Odds_Ratio = coef(logRegModelData), confint(logRegModelData)))
 
-# USING THE MODEL TO MAKE PREDICTIONS ----
+# Using the model to make predictions ----
 data(titanic_test, package = "titanic")
 
 titanicNew <- as_tibble(titanic_test)
@@ -98,7 +98,7 @@ titanicNewClean <- titanicNew %>%
 
 predict(logRegModel, newdata = titanicNewClean)
 
-# EXERCISES ----
+# Exercises ----
 # 1
 titanicUntidy %>%
   filter(Variable != "Pclass" & Variable != "Sex") %>%
