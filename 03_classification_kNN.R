@@ -4,8 +4,8 @@
 # Installing and loading packages----
 # install.packages("mlr", dependencies = TRUE) 
 # only needed once on any R installation
-library(mlr3)
-# library(mlr)
+# library(mlr3)
+library(mlr)
 
 library(tidyverse)
 
@@ -31,15 +31,15 @@ ggplot(diabetesTib, aes(sspg, glucose, col = class)) +
   geom_point() +
   theme_bw()
 
-# DEFINING THE DIABETES TASK ----
+# Defining the diabetes task ----
 diabetesTask <- makeClassifTask(data = diabetesTib, target = "class")
 
 diabetesTask
 
-# DEFINING THE KNN LEARNER ----
+# Defining the knn learner ----
 knn <- makeLearner("classif.knn", par.vals = list("k" = 2))
 
-# LISTING ALL OF MLR'S LEARNERS ----
+# Listing all of mlr's learners ----
 listLearners()$class
 
 # or list them by function:
@@ -49,15 +49,24 @@ listLearners("regr")$class
 
 listLearners("cluster")$class
 
-# DEFINE MODEL ----
+# Define model ----
 knnModel <- train(knn, diabetesTask)
 
-# TESTING PERFORMANCE ON TRAINING DATA (VERY BAD PRACTICE) ----
+# Testing performance on training data (very bad practice) ----
 knnPred <- predict(knnModel, newdata = diabetesTib)
 
+# mean misclassification error; and accuracy.
+
+# MMCE is simply the proportion of cases classified as a class other than 
+# their true class. 
+
+# Accuracy is the opposite of this: the proportion of cases that were 
+# correctly classified by the model. 
+
+# The two values add up to 1.00:
 performance(knnPred, measures = list(mmce, acc))
 
-# PERFORMING HOLD-OUT CROSS-VALIDATION ----
+# Performance Hold-out cross validation ----
 holdout <- makeResampleDesc(method = "Holdout", split = 2/3, 
                             stratify = TRUE)
 
@@ -69,7 +78,7 @@ holdoutCV$aggr
 
 calculateConfusionMatrix(holdoutCV$pred, relative = TRUE)
 
-# PERFORMING REPEATED K-FOLD CROSS-VALIDATION ----
+# Performing repeated k-fold cross-validation ----
 kFold <- makeResampleDesc(method = "RepCV", folds = 10, reps = 50, 
                           stratify = TRUE)
 
@@ -82,7 +91,7 @@ kFoldCV$measures.test
 
 calculateConfusionMatrix(kFoldCV$pred, relative = TRUE)
 
-# PERFORMING LEAVE-ONE-OUT CROSS-VALIDATION ----
+# Performing leave-one-out cross validation ----
 LOO <- makeResampleDesc(method = "LOO")
 
 LOOCV <- resample(learner = knn, task = diabetesTask, resampling = LOO,
@@ -92,7 +101,7 @@ LOOCV$aggr
 
 calculateConfusionMatrix(LOOCV$pred, relative = TRUE)
 
-# HYPERPARAMETER TUNING OF K ----
+# Hyperparameter tuning of k ----
 knnParamSpace <- makeParamSet(makeDiscreteParam("k", values = 1:10))
 
 gridSearch <- makeTuneControlGrid()
@@ -114,12 +123,12 @@ plotHyperParsEffect(knnTuningData, x = "k", y = "mmce.test.mean",
                     plot.type = "line") +
                     theme_bw()
 
-# TRAINING FINAL MODEL WITH TUNED K ----
+# Training final model with tuned k ----
 tunedKnn <- setHyperPars(makeLearner("classif.knn"), par.vals = tunedK$x)
 
 tunedKnnModel <- train(tunedKnn, diabetesTask)
 
-# INCLUDING HYPERPARAMETER TUNING INSIDE NESTED CROSS-VALIDATION ----
+# Including hyperparameter tuning inside nested cross-validationi ----
 inner <- makeResampleDesc("CV")
 
 outer <- makeResampleDesc("RepCV", folds = 10, reps = 5)
@@ -132,7 +141,7 @@ cvWithTuning <- resample(knnWrapper, diabetesTask, resampling = outer)
 
 cvWithTuning
 
-# USING THE MODEL TO MAKE PREDICTIONS ----
+# Using the model to make predictions ----
 newDiabetesPatients <- tibble(glucose = c(82, 108, 300), 
                               insulin = c(361, 288, 1052),
                               sspg = c(200, 186, 135))
@@ -143,7 +152,7 @@ newPatientsPred <- predict(tunedKnnModel, newdata = newDiabetesPatients)
 
 getPredictionResponse(newPatientsPred)
 
-# EXERCISES ----
+# Exercises ----
 # 1
 ggplot(diabetesTib, aes(glucose, insulin, 
                         shape = class)) + 

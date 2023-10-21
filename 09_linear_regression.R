@@ -1,16 +1,17 @@
-###############################################
-#          SOURCE CODE FOR CHAPTER 9          #
-###############################################
+# CH-09: Linear Regression -----
 
-# LOAD PACKAGES ----
+
+# Load Packages ----
 library(mlr)
 
 library(tidyverse)
 
-# LOAD DATA ----
+# Load data ----
 data(Ozone, package = "mlbench")
 
 ozoneTib <- as_tibble(Ozone)
+
+head(ozoneTib)
 
 names(ozoneTib) <- c("Month", "Date", "Day", "Ozone", "Press_height", 
                      "Wind", "Humid", "Temp_Sand", "Temp_Monte", 
@@ -23,7 +24,7 @@ ozoneClean <- mutate_all(ozoneTib, as.numeric) %>%
 
 ozoneClean
 
-# PLOT DATA ----
+# Plot data ----
 ozoneUntidy <- gather(ozoneClean, key = "Variable", value = "Value", -Ozone)
   
 ozoneUntidy 

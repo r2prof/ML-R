@@ -1,13 +1,10 @@
-###############################################
-#          SOURCE CODE FOR CHAPTER 4          #
-###############################################
+# CH-04-----
 
-# LOAD PACKLAGES ----
+# Load Packages----
 library(mlr)
-
 library(tidyverse)
 
-# LOAD DATA ----
+# Load data-----
 install.packages("titanic")
 
 data(titanic_train, package = "titanic")
@@ -16,7 +13,7 @@ titanicTib <- as_tibble(titanic_train)
 
 titanicTib
 
-# CLEAN DATA ----
+# Clean data----
 fctrs <- c("Survived", "Sex", "Pclass")
 
 titanicClean <- titanicTib %>%
